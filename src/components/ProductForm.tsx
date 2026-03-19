@@ -16,7 +16,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
     size: '',
     weight: '',
     quantity: 0,
-    minStock: 0
+    minStock: 0,
+    notes: ''
   });
 
   useEffect(() => {
@@ -28,7 +29,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
         size: product.size || '',
         weight: product.weight || '',
         quantity: product.quantity,
-        minStock: product.minStock
+        minStock: product.minStock,
+        notes: product.notes || ''
       });
     }
   }, [product]);
@@ -74,14 +76,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest font-mono text-[#141414]/60 mb-2">Tipo (ex: Martelo, Chave)</label>
+              <label className="block text-[10px] uppercase tracking-widest font-mono text-[#141414]/60 mb-2">Tipo de Ferramenta</label>
               <input
                 required
+                list="tool-types"
                 type="text"
+                placeholder="SELECIONE OU DIGITE..."
                 className="w-full bg-white border border-[#141414] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#141414]/10"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               />
+              <datalist id="tool-types">
+                <option value="Martelo" />
+                <option value="Chave de Fenda" />
+                <option value="Chave Phillips" />
+                <option value="Alicate" />
+                <option value="Chave Inglesa" />
+                <option value="Furadeira" />
+                <option value="Parafusadeira" />
+                <option value="Serrote" />
+                <option value="Trena" />
+                <option value="Nível" />
+                <option value="Esmerilhadeira" />
+                <option value="Martelete" />
+              </datalist>
             </div>
 
             <div>
@@ -136,6 +154,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onClose }) =>
                 className="w-full bg-white border border-[#141414] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#141414]/10"
                 value={formData.minStock}
                 onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-[10px] uppercase tracking-widest font-mono text-[#141414]/60 mb-2">Observações (Opcional)</label>
+              <textarea
+                rows={3}
+                className="w-full bg-white border border-[#141414] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#141414]/10 resize-none"
+                placeholder="DETALHES ADICIONAIS SOBRE O PRODUTO..."
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               />
             </div>
           </div>

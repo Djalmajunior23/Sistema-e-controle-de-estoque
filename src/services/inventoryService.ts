@@ -74,7 +74,8 @@ export const inventoryService = {
     quantity: number, 
     type: MovementType, 
     responsible: string,
-    currentStock: number
+    currentStock: number,
+    notes?: string
   ) => {
     const newStock = type === 'in' ? currentStock + quantity : currentStock - quantity;
     
@@ -91,7 +92,8 @@ export const inventoryService = {
       quantity,
       type,
       responsible,
-      date: now
+      date: now,
+      notes: notes || null
     });
 
     // 2. Update product stock

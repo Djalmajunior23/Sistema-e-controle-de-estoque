@@ -13,6 +13,7 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
   const [type, setType] = useState<MovementType>('in');
   const [quantity, setQuantity] = useState(1);
   const [responsible, setResponsible] = useState(auth.currentUser?.displayName || '');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +28,8 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
         quantity,
         type,
         responsible,
-        product.quantity
+        product.quantity,
+        notes
       );
       onClose();
     } catch (error) {
@@ -101,6 +103,16 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
                 className="w-full bg-white border border-[#141414] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#141414]/10"
                 value={responsible}
                 onChange={(e) => setResponsible(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-mono text-[#141414]/60 mb-2">Observações / Motivo (Opcional)</label>
+              <textarea
+                className="w-full bg-white border border-[#141414] p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#141414]/10 min-h-[80px] resize-none"
+                placeholder="EX: MANUTENÇÃO PREVENTIVA, REPOSIÇÃO DE ESTOQUE..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
             </div>
           </div>

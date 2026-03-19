@@ -11,6 +11,7 @@ export interface Product {
   weight?: string;
   quantity: number;
   minStock: number;
+  notes?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -23,6 +24,7 @@ export interface Movement {
   type: MovementType;
   responsible: string;
   date: Timestamp;
+  notes?: string;
 }
 
 export interface InventoryStats {
