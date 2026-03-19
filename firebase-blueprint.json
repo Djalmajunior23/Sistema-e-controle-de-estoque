@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "products": {
+      "title": "Product",
+      "description": "A tool in the inventory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product name" },
+        "type": { "type": "string", "description": "Tool type (hammer, wrench, etc.)" },
+        "material": { "type": "string", "description": "Material of the tool" },
+        "size": { "type": "string", "description": "Size dimensions" },
+        "weight": { "type": "string", "description": "Weight" },
+        "quantity": { "type": "number", "description": "Current stock quantity" },
+        "minStock": { "type": "number", "description": "Minimum stock threshold" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["name", "type", "quantity", "minStock"]
+    },
+    "movements": {
+      "title": "Movement",
+      "description": "Stock entry or exit record",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "ID of the product" },
+        "productName": { "type": "string", "description": "Name of the product (denormalized)" },
+        "quantity": { "type": "number", "description": "Amount moved" },
+        "type": { "type": "string", "enum": ["in", "out"], "description": "Movement type" },
+        "responsible": { "type": "string", "description": "Person responsible for the movement" },
+        "date": { "type": "string", "format": "date-time", "description": "Movement date" }
+      },
+      "required": ["productId", "quantity", "type", "responsible", "date"]
+    }
+  },
+  "firestore": {
+    "products": { "schema": "products", "description": "Inventory of tools" },
+    "movements": { "schema": "movements", "description": "History of stock movements" }
+  }
+}

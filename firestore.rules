@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: products
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - type: string (required, 1-50 chars)
+    //   - material: string (optional, 1-50 chars)
+    //   - size: string (optional, 1-50 chars)
+    //   - weight: string (optional, 1-50 chars)
+    //   - quantity: number (required, >= 0)
+    //   - minStock: number (required, >= 0)
+    //   - createdAt: timestamp (required)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: movements
+    // Document ID: auto-generated
+    // Fields:
+    //   - productId: string (required)
+    //   - productName: string (required)
+    //   - quantity: number (required, > 0)
+    //   - type: string (required, in ['in', 'out'])
+    //   - responsible: string (required, 1-100 chars)
+    //   - date: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.type is string && data.type.size() > 0 && data.type.size() <= 50 &&
+             data.quantity is number && data.quantity >= 0 &&
+             data.minStock is number && data.minStock >= 0 &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidMovement(data) {
+      return data.productId is string &&
+             data.productName is string &&
+             data.quantity is number && data.quantity > 0 &&
+             data.type in ['in', 'out'] &&
+             data.responsible is string && data.responsible.size() > 0 && data.responsible.size() <= 100 &&
+             data.date is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                      hasRequiredFields(['name', 'type', 'quantity', 'minStock', 'createdAt', 'updatedAt']) &&
+                      isValidProduct(request.resource.data);
+      allow update: if isAuthenticated() && 
+                      isValidProduct(request.resource.data) &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAuthenticated();
+    }
+
+    match /movements/{movementId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                      hasRequiredFields(['productId', 'productName', 'quantity', 'type', 'responsible', 'date']) &&
+                      isValidMovement(request.resource.data);
+      allow update, delete: if false; // Movements are immutable history
+    }
+    
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "ToolStock - Sistema de Controle de Estoque",
+  "description": "Sistema profissional para gestão de estoque de ferramentas com controle de entradas, saídas e alertas de estoque mínimo.",
+  "requestFramePermissions": []
+}
