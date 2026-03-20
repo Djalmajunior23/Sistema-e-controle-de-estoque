@@ -15,10 +15,18 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
   const [responsible, setResponsible] = useState(auth.currentUser?.displayName || '');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product.id) return;
+    setError(null);
+
+    // Validation: Check if 'out' movement exceeds available stock
+    if (type === 'out' && quantity > product.quantity) {
+      setError(`Quantidade insuficiente em estoque. Disponível: ${product.quantity}`);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -32,9 +40,9 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
         notes
       );
       onClose();
-    } catch (error) {
-      console.error("Error recording movement:", error);
-      alert(error instanceof Error ? error.message : "Erro ao registrar movimentação.");
+    } catch (err) {
+      console.error("Error recording movement:", err);
+      setError(err instanceof Error ? err.message : "Erro ao registrar movimentação.");
     } finally {
       setLoading(false);
     }
@@ -53,6 +61,13 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-500 text-red-600 text-[10px] uppercase font-bold tracking-widest flex items-center gap-2">
+              <X size={14} className="shrink-0" />
+              {error}
+            </div>
+          )}
+
           <div className="mb-8 p-4 bg-white border border-[#141414] border-dashed">
             <div className="text-[10px] uppercase tracking-widest font-mono text-[#141414]/40">Produto Selecionado</div>
             <div className="font-bold text-lg uppercase">{product.name}</div>
