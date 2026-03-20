@@ -221,6 +221,62 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Recent Movements Section */}
+      <div className="bg-white border border-[#141414] shadow-[8px_8px_0px_0px_rgba(20,20,20,1)]">
+        <div className="p-4 border-b border-[#141414] bg-[#141414] text-[#E4E3E0] flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-widest font-mono">Últimas Movimentações</h2>
+          <ArrowRight size={14} />
+        </div>
+        
+        <div className="divide-y divide-[#141414]">
+          {movements.length === 0 ? (
+            <div className="p-12 text-center text-[#141414]/40 italic font-serif">
+              Nenhuma movimentação registrada.
+            </div>
+          ) : (
+            movements.slice(0, 5).map(movement => (
+              <div key={movement.id} className="p-4 flex items-center justify-between hover:bg-[#141414]/5 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 flex items-center justify-center border border-[#141414] ${
+                    movement.type === 'in' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  }`}>
+                    {movement.type === 'in' ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm uppercase">{movement.productName}</div>
+                    <div className="text-[10px] text-[#141414]/60 font-mono uppercase">
+                      {movement.responsible} • {format(movement.date.toDate(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-8">
+                  <div className="text-right">
+                    <div className="text-[10px] uppercase font-mono text-[#141414]/40">Qtd</div>
+                    <div className={`font-bold ${movement.type === 'in' ? 'text-green-600' : 'text-red-600'}`}>
+                      {movement.type === 'in' ? '+' : '-'}{movement.quantity}
+                    </div>
+                  </div>
+                  {movement.notes && (
+                    <div className="hidden md:block max-w-[200px] text-right">
+                      <div className="text-[10px] uppercase font-mono text-[#141414]/40">Notas</div>
+                      <div className="text-[10px] italic truncate">{movement.notes}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {movements.length > 5 && (
+          <div className="p-4 bg-[#141414]/5 text-center">
+            <p className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#141414]/40">
+              Veja o histórico completo na aba de movimentações
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

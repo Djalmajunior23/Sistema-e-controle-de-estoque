@@ -12,6 +12,7 @@ export const ProductList: React.FC = () => {
   const [isMovementOpen, setIsMovementOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
+  const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = inventoryService.subscribeToProducts(setProducts);
@@ -22,6 +23,10 @@ export const ProductList: React.FC = () => {
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const toggleExpand = (id: string) => {
+    setExpandedProductId(expandedProductId === id ? null : id);
+  };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Deseja realmente excluir este produto?")) {
@@ -75,50 +80,98 @@ export const ProductList: React.FC = () => {
           <tbody className="divide-y divide-[#141414]">
             {filteredProducts.map(product => {
               const isLowStock = product.quantity <= product.minStock;
+              const isExpanded = expandedProductId === product.id;
               return (
-                <tr key={product.id} className={`hover:bg-[#141414]/5 transition-colors ${isLowStock ? 'bg-red-50' : ''}`}>
-                  <td className="p-4">
-                    <div className="font-bold text-sm uppercase">{product.name}</div>
-                    <div className="text-[10px] text-[#141414]/40 font-mono">ID: {product.id?.slice(0, 8)}</div>
-                  </td>
-                  <td className="p-4 text-xs uppercase font-medium">{product.type}</td>
-                  <td className="p-4 text-center text-xs text-[#141414]/60">
-                    {product.material || '-'} / {product.size || '-'}
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className={`font-bold text-lg ${isLowStock ? 'text-red-500' : ''}`}>
-                      {product.quantity}
-                    </div>
-                  </td>
-                  <td className="p-4 text-center text-xs font-mono text-[#141414]/40">
-                    {product.minStock}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => { setSelectedProduct(product); setIsMovementOpen(true); }}
-                        title="Movimentar Estoque"
-                        className="p-2 border border-[#141414] hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors"
-                      >
-                        <ArrowUpDown size={14} />
-                      </button>
-                      <button
-                        onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}
-                        title="Editar Produto"
-                        className="p-2 border border-[#141414] hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors"
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id!)}
-                        title="Excluir Produto"
-                        className="p-2 border border-[#141414] hover:bg-red-500 hover:text-white transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <React.Fragment key={product.id}>
+                  <tr 
+                    className={`hover:bg-[#141414]/5 transition-colors cursor-pointer ${isLowStock ? 'bg-red-50' : ''} ${isExpanded ? 'bg-[#141414]/5' : ''}`}
+                    onClick={() => toggleExpand(product.id!)}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="font-bold text-sm uppercase">{product.name}</div>
+                        {isLowStock && (
+                          <div className="text-red-500" title="Estoque Baixo">
+                            <AlertTriangle size={14} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-[#141414]/40 font-mono">ID: {product.id?.slice(0, 8)}</div>
+                    </td>
+                    <td className="p-4 text-xs uppercase font-medium">{product.type}</td>
+                    <td className="p-4 text-center text-xs text-[#141414]/60">
+                      {product.material || '-'} / {product.size || '-'}
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className={`font-bold text-lg ${isLowStock ? 'text-red-500' : ''}`}>
+                        {product.quantity}
+                      </div>
+                      {isLowStock && (
+                        <div className="text-[8px] font-bold text-red-500 uppercase tracking-tighter">Crítico</div>
+                      )}
+                    </td>
+                    <td className="p-4 text-center text-xs font-mono text-[#141414]/40">
+                      {product.minStock}
+                    </td>
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => { setSelectedProduct(product); setIsMovementOpen(true); }}
+                          title="Movimentar Estoque"
+                          className="p-2 border border-[#141414] hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors"
+                        >
+                          <ArrowUpDown size={14} />
+                        </button>
+                        <button
+                          onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}
+                          title="Editar Produto"
+                          className="p-2 border border-[#141414] hover:bg-[#141414] hover:text-[#E4E3E0] transition-colors"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id!)}
+                          title="Excluir Produto"
+                          className="p-2 border border-[#141414] hover:bg-red-500 hover:text-white transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {isExpanded && (
+                    <tr className="bg-[#141414]/[0.02] border-b border-[#141414]">
+                      <td colSpan={6} className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                          <div>
+                            <div className="text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Material</div>
+                            <div className="text-xs font-bold uppercase">{product.material || 'Não informado'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Tamanho</div>
+                            <div className="text-xs font-bold uppercase">{product.size || 'Não informado'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Peso</div>
+                            <div className="text-xs font-bold uppercase">{product.weight || 'Não informado'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Unidade</div>
+                            <div className="text-xs font-bold uppercase">{product.unit || 'UN'}</div>
+                          </div>
+                        </div>
+                        {product.notes && (
+                          <div className="mt-6 pt-6 border-t border-[#141414]/10">
+                            <div className="text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Observações</div>
+                            <div className="text-xs font-serif italic text-[#141414]/80 leading-relaxed">
+                              {product.notes}
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
           </tbody>

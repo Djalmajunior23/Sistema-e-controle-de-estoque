@@ -42,7 +42,7 @@ export const MovementHistory: React.FC = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['Data/Hora', 'Produto', 'Tipo', 'Quantidade', 'Responsável', 'Observações'];
+    const headers = ['Date/Time', 'Product Name', 'Type', 'Quantity', 'Responsible', 'Notes'];
     const rows = filteredMovements.map(m => [
       format(m.date.toDate(), "dd/MM/yyyy HH:mm"),
       m.productName,
@@ -57,7 +57,7 @@ export const MovementHistory: React.FC = () => {
       ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -127,7 +127,7 @@ export const MovementHistory: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="flex-1 md:w-48">
               <label className="block text-[10px] uppercase font-mono text-[#141414]/40 mb-1">Início</label>
@@ -155,15 +155,18 @@ export const MovementHistory: React.FC = () => {
             </div>
           </div>
 
-          {(searchTerm || filterType !== 'all' || startDate || endDate) && (
-            <button
-              onClick={clearFilters}
-              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-600 transition-colors"
-            >
-              <XCircle size={14} />
-              Limpar Filtros
-            </button>
-          )}
+          <button
+            onClick={clearFilters}
+            disabled={!(searchTerm || filterType !== 'all' || startDate || endDate)}
+            className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+              (searchTerm || filterType !== 'all' || startDate || endDate)
+                ? 'text-red-500 hover:text-red-600'
+                : 'text-[#141414]/20 cursor-default'
+            }`}
+          >
+            <XCircle size={14} />
+            Limpar Filtros
+          </button>
         </div>
       </div>
 

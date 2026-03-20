@@ -16,6 +16,7 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,16 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
       return;
     }
 
+    if (type === 'out' && !showConfirmation) {
+      setShowConfirmation(true);
+      return;
+    }
+
+    await executeMovement();
+  };
+
+  const executeMovement = async () => {
+    if (!product.id) return;
     setLoading(true);
     try {
       await inventoryService.recordMovement(
@@ -43,6 +54,7 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
     } catch (err) {
       console.error("Error recording movement:", err);
       setError(err instanceof Error ? err.message : "Erro ao registrar movimentação.");
+      setShowConfirmation(false);
     } finally {
       setLoading(false);
     }
@@ -50,7 +62,52 @@ export const MovementForm: React.FC<MovementFormProps> = ({ product, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-[#141414]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-[#E4E3E0] border border-[#141414] w-full max-w-md shadow-[16px_16px_0px_0px_rgba(20,20,20,1)]">
+      <div className="bg-[#E4E3E0] border border-[#141414] w-full max-w-md shadow-[16px_16px_0px_0px_rgba(20,20,20,1)] relative">
+        {showConfirmation && (
+          <div className="absolute inset-0 bg-[#E4E3E0] z-10 flex flex-col p-8">
+            <div className="flex-1 flex flex-col justify-center">
+              <h3 className="text-xl font-bold uppercase tracking-tighter mb-6">Confirmar Saída</h3>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between items-center border-b border-[#141414]/10 pb-2">
+                  <span className="text-[10px] uppercase font-mono text-[#141414]/60">Estoque Atual</span>
+                  <span className="font-bold">{product.quantity}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-[#141414]/10 pb-2">
+                  <span className="text-[10px] uppercase font-mono text-[#141414]/60">Quantidade a Remover</span>
+                  <span className="font-bold text-red-500">-{quantity}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-[10px] uppercase font-mono text-[#141414]/60">Estoque Resultante</span>
+                  <span className="font-bold text-lg">{product.quantity - quantity}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#141414]/60 italic font-serif mb-8">
+                Esta ação irá atualizar o estoque permanentemente. Deseja continuar?
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setShowConfirmation(false)}
+                className="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest border border-[#141414] hover:bg-[#141414]/5 transition-colors"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={executeMovement}
+                className="flex-1 bg-[#141414] text-[#E4E3E0] px-8 py-3 font-bold uppercase tracking-widest text-xs hover:bg-[#141414]/90 transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Processando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-[#141414] text-[#E4E3E0] p-4 flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-widest font-mono">
             Movimentar Estoque
